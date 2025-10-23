@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beautiful Todo App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            background: linear-gradient(135deg, #581c87 0%, #1e3a8a 50%, #312e81 100%);
+            position: relative;
+        }
+
+        .background {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            mix-blend-mode: multiply;
+            filter: blur(80px);
+            opacity: 0.2;
+            animation: blob 7s infinite;
+        }
+
+        .blob1 {
+            width: 384px;
+            height: 384px;
+            background: #ec4899;
+            top: 0;
+            left: -16px;
+        }
+
+        .blob2 {
+            width: 384px;
+            height: 384px;
+            background: #a855f7;
+            top: 0;
+            right: 0;
+            animation-delay: 2s;
+        }
+
+        .blob3 {
+            width: 384px;
+            height: 384px;
+            background: #3b82f6;
+            bottom: 0;
+            left: 80px;
+            animation-delay: 4s;
+        }
+
+        .blob4 {
+            width: 384px;
+            height: 384px;
+            background: #6366f1;
+            bottom: 80px;
+            right: 80px;
+            animation-delay: 6s;
+        }
+
+        @keyframes blob {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            25% { transform: translate(20px, -50px) scale(1.1); }
+            50% { transform: translate(-20px, 20px) scale(0.9); }
+            75% { transform: translate(50px, 50px) scale(1.05); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 32px;
+        }
+
+        .content {
+            width: 100%;
+            max-width: 672px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .header h1 {
+            font-size: 48px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 8px;
+            text-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header p {
+            color: #bfdbfe;
+            font-size: 18px;
+        }
+
+        .input-section {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .input-section input {
+            flex: 1;
+            padding: 16px 24px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 16px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .input-section input::placeholder {
+            color: #bfdbfe;
+        }
+
+        .input-section input:focus {
+            ring: 2px solid #a78bfa;
+            border-color: transparent;
+        }
+
+        .add-btn {
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+            border-radius: 16px;
+            color: white;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-btn:hover {
+            background: linear-gradient(135deg, #9333ea 0%, #db2777 100%);
+            transform: scale(1.05);
+        }
+
+        .todo-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s;
+            cursor: move;
+        }
+
+        .todo-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .todo-item.completed {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .todo-item.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+
+        .grip-icon {
+            color: rgba(255, 255, 255, 0.4);
+            transition: color 0.3s;
+            flex-shrink: 0;
+        }
+
+        .todo-item:hover .grip-icon {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .todo-text {
+            flex: 1;
+            font-size: 18px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .todo-item.completed .todo-text {
+            color: rgba(255, 255, 255, 0.4);
+            text-decoration: line-through;
+        }
+
+        .delete-btn {
+            padding: 8px;
+            border-radius: 12px;
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            opacity: 0;
+            flex-shrink: 0;
+        }
+
+        .todo-item:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .delete-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+            color: #fecaca;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 64px 0;
+            color: rgba(191, 219, 254, 0.6);
+            font-size: 20px;
+        }
+
+        svg {
+            width: 20px;
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="background">
+        <div class="blob blob1"></div>
+        <div class="blob blob2"></div>
+        <div class="blob blob3"></div>
+        <div class="blob blob4"></div>
+    </div>
+
+    <div class="container">
+        <div class="content">
+            <div class="header">
+                <h1>My Tasks</h1>
+                <p>Organize your day beautifully</p>
+            </div>
+
+            <div class="input-section">
+                <input type="text" id="todoInput" placeholder="Add a new task...">
+                <button class="add-btn" onclick="addTodo()">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Add
+                </button>
+            </div>
+
+            <div class="todo-list" id="todoList"></div>
+        </div>
+    </div>
+
+    <script>
+        let todos = [
+            { id: 1, text: 'Welcome to your beautiful todo app', completed: false },
+            { id: 2, text: 'Drag tasks to reorder them', completed: false },
+            { id: 3, text: 'Click to mark as complete', completed: true }
+        ];
+
+        let draggedIndex = null;
+
+        function render() {
+            const todoList = document.getElementById('todoList');
+            
+            if (todos.length === 0) {
+                todoList.innerHTML = '<div class="empty-state">No tasks yet. Add one to get started!</div>';
+                return;
+            }
+
+            todoList.innerHTML = todos.map((todo, index) => `
+                <div class="todo-item ${todo.completed ? 'completed' : ''}" 
+                     draggable="true" 
+                     data-index="${index}">
+                    <div class="grip-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path>
+                        </svg>
+                    </div>
+                    <div class="todo-text" onclick="toggleComplete(${index})">
+                        ${todo.text}
+                    </div>
+                    <button class="delete-btn" onclick="deleteTodo(${index})">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            `).join('');
+
+            // Add drag event listeners
+            document.querySelectorAll('.todo-item').forEach(item => {
+                item.addEventListener('dragstart', handleDragStart);
+                item.addEventListener('dragover', handleDragOver);
+                item.addEventListener('dragend', handleDragEnd);
+            });
+        }
+
+        function addTodo() {
+            const input = document.getElementById('todoInput');
+            const text = input.value.trim();
+            
+            if (text) {
+                todos.push({
+                    id: Date.now(),
+                    text: text,
+                    completed: false
+                });
+                input.value = '';
+                render();
+            }
+        }
+
+        function deleteTodo(index) {
+            todos.splice(index, 1);
+            render();
+        }
+
+        function toggleComplete(index) {
+            todos[index].completed = !todos[index].completed;
+            render();
+        }
+
+        function handleDragStart(e) {
+            draggedIndex = parseInt(e.target.dataset.index);
+            e.target.classList.add('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            const targetIndex = parseInt(e.currentTarget.dataset.index);
+            
+            if (draggedIndex !== null && draggedIndex !== targetIndex) {
+                const draggedTodo = todos[draggedIndex];
+                todos.splice(draggedIndex, 1);
+                todos.splice(targetIndex, 0, draggedTodo);
+                draggedIndex = targetIndex;
+                render();
+            }
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            draggedIndex = null;
+        }
+
+        // Enter key support
+        document.getElementById('todoInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addTodo();
+            }
+        });
+
+        // Initial render
+        render();
+    </script>
+</body>
+</html>
